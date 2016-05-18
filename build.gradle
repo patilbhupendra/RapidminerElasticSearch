@@ -2,6 +2,7 @@ buildscript {
 	repositories {
 	    jcenter()
 		maven { url 'https://maven.rapidminer.com/content/groups/public/' }
+		maven { url 'https://search.maven.org' }
 	}
 }
 
@@ -11,12 +12,13 @@ plugins { id 'com.rapidminer.extension' version '0.8.0' }
 repositories {
     jcenter()
 	maven { url 'https://maven.rapidminer.com/content/groups/public/' }
+	maven { url 'https://search.maven.org' }
 }
 
 extensionConfig {
 
     // The extension name
-    name 'Template'
+    name 'Elastic Search'
 
     /*
      * The artifact group which will be used when publishing the extensions Jar
@@ -52,4 +54,5 @@ extensionConfig {
 // Define third party library dependencies
 dependencies {
 	//compile 'com.google.guava:guava:18.0'
+	compile 'org.elasticsearch:elasticsearch:2.3.2'
 }
