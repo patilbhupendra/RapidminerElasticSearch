@@ -22,8 +22,6 @@ import com.rapidminer.example.ExampleSet;
 import com.rapidminer.operator.OperatorDescription;
 import com.rapidminer.operator.OperatorException;
 
-import static org.elasticsearch.common.xcontent.XContentFactory.*;
-
 
 public class ExampleSetToElasticSearchWriter extends AbstractWriter<ExampleSet> {
 
@@ -33,6 +31,9 @@ public class ExampleSetToElasticSearchWriter extends AbstractWriter<ExampleSet> 
 		// TODO Auto-generated constructor stub
 	}
 
+	  //TODO how does bulk deal with millions of rows together
+	  //convert all to settings and preferences
+	  
 	private static final Logger LOGGER = Logger.getLogger(ExampleSetToElasticSearchWriter.class
 	            .getName());
 
@@ -44,13 +45,12 @@ public class ExampleSetToElasticSearchWriter extends AbstractWriter<ExampleSet> 
 		Settings settings = Settings.settingsBuilder()
 		       .put("cluster.name", "my-application").build();
 		
-		//Client client = TransportClient.builder().settings(settings).build();
-			LOGGER.info("I am going to try to load something newwwweeee");
+				LOGGER.finest("I am going to try to load something newwwweeee");
 				Client client = TransportClient.builder()
 			        .settings(settings)
 			        .build()
 			        .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("localhost"), 9300));
-				LOGGER.info("Done building client");
+				LOGGER.finest("Done building client");
 		
 				 final Iterator<Attribute> attributes = exampleSet.getAttributes().allAttributes();
 				 
@@ -84,22 +84,12 @@ public class ExampleSetToElasticSearchWriter extends AbstractWriter<ExampleSet> 
 					
 				}
 				
-			/*	Map<String, Object> json = new HashMap<String, Object>();
-				json.put("user","kimchy");
-				json.put("postDate",new Date());
-				json.put("message","trying out Elasticsearch");
-				
-			*/	
-			
-				
-		
-			
-				
 		BulkResponse bulkResponse = bulkRequest.get();
 		
 		if (bulkResponse.hasFailures()) {
 		    // process failures by iterating through each bulk response item
 			LOGGER.info("Failures in bulk request");
+			LOGGER.info(bulkResponse.buildFailureMessage());
 		}
 		
 		}

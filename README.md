@@ -1,20 +1,16 @@
-RapidMiner Extension Template
+RapidMiner Elastic Search Integration
 =============================
 
-A template project for creating a RapidMiner Studio extension. 
+Rapidminer extension to work with Elastic Search.
+Currently working with the official elastic.co offering
+
 
 ### Prerequisite
 * Requires Gradle 2.3+ (get it [here](http://gradle.org/installation) or use the Gradle wrapper shipped with this template)
 
 ### Getting started
-1. Clone the extension template
+Please note the elastic search is little finicky that the code needs to be build with same version of API as the version of elastic search you are working with.
 
-2. Change the extension settings in _build.gradle_ (e.g. replace 'Template' by the desired extension name)
+Goal will be to have atleast two operators read from elastic search and write to elastic search.
 
-3. Initialize the extension project by executing the _initializeExtensionProject_ Gradle task (e.g. via 'gradlew initializeExtensionProject')
-
-4. Add an extension icon by placing an image named "icon.png" in  _src/main/resources/META-INF/_. 
-
-5. Build and install your extension by executing the _installExtension_ Gradle task 
-
-6. Start RapidMiner Studio and check whether your extension has been loaded
+5/18 -  Attempted to write data to a hardcoded index, works for now
