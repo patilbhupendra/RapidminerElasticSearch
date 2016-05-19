@@ -23,6 +23,7 @@ import static org.elasticsearch.index.query.QueryBuilders.*;
 
 import java.awt.List;
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -41,8 +42,12 @@ import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import com.rapidminer.example.Attribute;
 import com.rapidminer.example.Example;
 import com.rapidminer.example.ExampleSet;
+import com.rapidminer.example.table.AttributeFactory;
+import com.rapidminer.example.table.DoubleArrayDataRow;
+import com.rapidminer.example.table.MemoryExampleTable;
 import com.rapidminer.operator.OperatorDescription;
 import com.rapidminer.operator.OperatorException;
+import com.rapidminer.tools.Ontology;
 
 
 public class ElasticSearchToExampleSetOperator extends AbstractReader<ExampleSet> {
@@ -61,10 +66,23 @@ public class ElasticSearchToExampleSetOperator extends AbstractReader<ExampleSet
 	@Override
 	public ExampleSet read() throws OperatorException {
 		
+		ArrayList<Attribute> attributes = new ArrayList<Attribute>();
+		
+		Attribute dateattribute = AttributeFactory.createAttribute("Text", Ontology.POLYNOMINAL);
+		
+		attributes.add(dateattribute);
+		
+		MemoryExampleTable table = new MemoryExampleTable(attributes);
+		
+		
 		try
 		{
 		// TODO Auto-generated method stub
 		//TODO figure out which is  the correct setting to use
+			
+		//	ExampleSet exampleSet;
+			
+			
 		Settings settings = Settings.settingsBuilder()
 			       .put("cluster.name", "my-application").build();
 		
@@ -113,6 +131,7 @@ public class ElasticSearchToExampleSetOperator extends AbstractReader<ExampleSet
 		}*/
 	    
 	    
+	    
 	  //Scroll until no hits are returned
 	    do {
 	        for (SearchHit hit : scrollResp.getHits().getHits()) {
@@ -126,6 +145,9 @@ public class ElasticSearchToExampleSetOperator extends AbstractReader<ExampleSet
 	        		LOGGER.finest(mymap);
 	        	}
 	        	*/
+	        	
+	        
+	        	
 	        	Set<Map.Entry<String, SearchHitField>> set = hit.getFields().entrySet();
 	        	LOGGER.finest("Size is ");
 	        	LOGGER.finest(String.valueOf(set.size()));
@@ -133,6 +155,18 @@ public class ElasticSearchToExampleSetOperator extends AbstractReader<ExampleSet
                 while (iter.hasNext()) {
                     SearchHitField field = iter.next().getValue();
                     LOGGER.finest(field.getValue().toString());
+                    
+                    
+                    double[] values = new double[1];
+					 
+					
+					 
+					 values[0] = attributes.get(0).getMapping().mapString(field.getValue().toString());
+					 
+	
+					table.addDataRow(new DoubleArrayDataRow(values));
+                   
+                    
                     //if(iter.hasNext()) fileWriter.write(",");
                 }
               //  if (counter > 1) {
@@ -154,7 +188,7 @@ public class ElasticSearchToExampleSetOperator extends AbstractReader<ExampleSet
 		{
 			LOGGER.finest(e.getMessage());
 		}
-		return null;
+		return table.createExampleSet();
 	}
 
 	
