@@ -67,11 +67,8 @@ public class ElasticSearchToExampleSetOperator extends AbstractReader<ExampleSet
 	public ExampleSet read() throws OperatorException {
 		
 		ArrayList<Attribute> attributes = new ArrayList<Attribute>();
-		
 		Attribute dateattribute = AttributeFactory.createAttribute("Text", Ontology.POLYNOMINAL);
-		
 		attributes.add(dateattribute);
-		
 		MemoryExampleTable table = new MemoryExampleTable(attributes);
 		
 		
@@ -79,8 +76,7 @@ public class ElasticSearchToExampleSetOperator extends AbstractReader<ExampleSet
 		{
 		// TODO Auto-generated method stub
 		//TODO figure out which is  the correct setting to use
-			
-		//	ExampleSet exampleSet;
+		//TODO How does this work on cluster rater than one	
 			
 			
 		Settings settings = Settings.settingsBuilder()
@@ -92,7 +88,7 @@ public class ElasticSearchToExampleSetOperator extends AbstractReader<ExampleSet
 		        .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("localhost"), 9300));
 		
 		
-			LOGGER.finest("Done building client");
+		LOGGER.finest("Done building client");
 		
 		QueryBuilder qb = termQuery("Text","event");
 		
@@ -110,44 +106,14 @@ public class ElasticSearchToExampleSetOperator extends AbstractReader<ExampleSet
 		
 		
 		// MatchAll on the whole cluster with all default options
-	//	SearchResponse scrollResp = client.prepareSearch().execute().actionGet();
 	    LOGGER.finest(String.valueOf(scrollResp.getHits().totalHits()));
-		/*while (true) {
-
-		    for (SearchHit hit : scrollResp.getHits().getHits()) {
-		        //Handle the hit...
-		    	LOGGER.finest("searchhit");
-		    	LOGGER.finest(hit.getFields().toString());
 	
-		    
-		    }
-	
-	//	    scrollResp = client.prepareSearchScroll(scrollResp.getScrollId()).setScroll(new TimeValue(60000)).execute().actionGet();
-		    //Break condition: No hits are returned
-		    if (scrollResp.getHits().getHits().length == 0) {
-		        break;
-		    }
-		   
-		}*/
-	    
-	    
-	    
-	  //Scroll until no hits are returned
+	    //Scroll until no hits are returned
 	    do {
 	        for (SearchHit hit : scrollResp.getHits().getHits()) {
 	            //Handle the hit...
 	        	LOGGER.finest("searchhit");
-		   /* 	//LOGGER.finest(hit.field("Text").toString());
-	        	LOGGER.finest(hit.toString());
-	        	LOGGER.finest
-	        	for (String mymap :  hit.getFields().keySet())
-	        	{
-	        		LOGGER.finest(mymap);
-	        	}
-	        	*/
-	        	
-	        
-	        	
+		    	
 	        	Set<Map.Entry<String, SearchHitField>> set = hit.getFields().entrySet();
 	        	LOGGER.finest("Size is ");
 	        	LOGGER.finest(String.valueOf(set.size()));
@@ -155,31 +121,12 @@ public class ElasticSearchToExampleSetOperator extends AbstractReader<ExampleSet
                 while (iter.hasNext()) {
                     SearchHitField field = iter.next().getValue();
                     LOGGER.finest(field.getValue().toString());
-                    
-                    
                     double[] values = new double[1];
-					 
-					
-					 
-					 values[0] = attributes.get(0).getMapping().mapString(field.getValue().toString());
-					 
-	
+					values[0] = attributes.get(0).getMapping().mapString(field.getValue().toString());
 					table.addDataRow(new DoubleArrayDataRow(values));
                    
-                    
-                    //if(iter.hasNext()) fileWriter.write(",");
                 }
-              //  if (counter > 1) {
-               //     fileWriter.write(",");
-              //      counter--;
-             //   }else {
-             //       fileWriter.write("\n");
-              //      counter = parameters.repeatCount;
-             //   }
-	        	
-		    	
 	        }
-
 	        scrollResp = client.prepareSearchScroll(scrollResp.getScrollId()).setScroll(new TimeValue(60000)).execute().actionGet();
 	    } while(scrollResp.getHits().getHits().length != 0); // Zero hits mark the end of the scroll and the while loop.
 		
@@ -190,7 +137,5 @@ public class ElasticSearchToExampleSetOperator extends AbstractReader<ExampleSet
 		}
 		return table.createExampleSet();
 	}
-
-	
 
 }

@@ -28,7 +28,7 @@ public class ExampleSetToElasticSearchWriter extends AbstractWriter<ExampleSet> 
 	  public ExampleSetToElasticSearchWriter(OperatorDescription description)
 	  {
 		super(description, ExampleSet.class);
-		// TODO Auto-generated constructor stub
+
 	}
 
 	  //TODO how does bulk deal with millions of rows together
@@ -71,11 +71,8 @@ public class ExampleSetToElasticSearchWriter extends AbstractWriter<ExampleSet> 
 					Map<String, Object> json = new HashMap<String, Object>();
 					for(int i=0;i<attributesList.size();i++)
 					{
-						
 						Attribute a =  attributesList.get(i);
-						
 						LOGGER.finest(a.getName());
-						
 						json.put(a.getName(), currexample.getValueAsString(a) );
 					}
 					bulkRequest.add(client.prepareIndex(indexName, indexType)
@@ -96,7 +93,6 @@ public class ExampleSetToElasticSearchWriter extends AbstractWriter<ExampleSet> 
 		catch(Exception e)
 		{
 			LOGGER.info(e.getMessage());
-	
 		}
 		return null;
 	}
