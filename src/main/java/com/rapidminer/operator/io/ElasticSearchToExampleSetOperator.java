@@ -1,8 +1,11 @@
 package com.rapidminer.operator.io;
-
+import java.util.LinkedList;
+import java.util.List;
 import java.net.InetAddress;
 import java.util.logging.Logger;
 
+import com.rapidminer.ElasticSearch.connection.ElasticSearchClient;
+import com.rapidminer.ElasticSearch.connection.ElasticSearchConnection;
 import com.rapidminer.example.ExampleSet;
 import com.rapidminer.operator.OperatorDescription;
 import com.rapidminer.operator.OperatorException;
@@ -21,7 +24,7 @@ import org.elasticsearch.search.SearchHitField;
 
 import static org.elasticsearch.index.query.QueryBuilders.*;
 
-import java.awt.List;
+//import java.awt.List;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Date;
@@ -47,12 +50,16 @@ import com.rapidminer.example.table.DoubleArrayDataRow;
 import com.rapidminer.example.table.MemoryExampleTable;
 import com.rapidminer.operator.OperatorDescription;
 import com.rapidminer.operator.OperatorException;
+import com.rapidminer.parameter.ParameterType;
+import com.rapidminer.tools.I18N;
 import com.rapidminer.tools.Ontology;
+import com.rapidminer.tools.config.ConfigurationManager;
+import com.rapidminer.tools.config.ParameterTypeConfigurable;
 
 
 public class ElasticSearchToExampleSetOperator extends AbstractReader<ExampleSet> {
 
-	
+	public static final String PARAMETER_CONNECTION = "Connection";
 	private static final Logger LOGGER = Logger.getLogger(ElasticSearchToExampleSetOperator.class
             .getName());
 
@@ -78,14 +85,15 @@ public class ElasticSearchToExampleSetOperator extends AbstractReader<ExampleSet
 		//TODO figure out which is  the correct setting to use
 		//TODO How does this work on cluster rater than one	
 			
+			ElasticSearchConnection connection = (ElasticSearchConnection)ConfigurationManager.getInstance().lookup("elasticsearch", 
+			        getParameterAsString("PARAMETER_CONNECTION"), getProcess().getRepositoryAccessor());
 			
-		Settings settings = Settings.settingsBuilder()
-			       .put("cluster.name", "my-application").build();
+			  String serverUrl = connection.getParameter("server_url");
+			    String serverPort = connection.getParameter("server_port");
+			    String serverClusterName = connection.getParameter("cluster_name");
+			
 		
-		Client client = TransportClient.builder()
-		        .settings(settings)
-		        .build()
-		        .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("localhost"), 9300));
+		Client client = new ElasticSearchClient(serverUrl, serverPort, serverClusterName).getTransportclient();
 		
 		
 		LOGGER.finest("Done building client");
@@ -138,4 +146,17 @@ public class ElasticSearchToExampleSetOperator extends AbstractReader<ExampleSet
 		return table.createExampleSet();
 	}
 
+	public List<ParameterType> getParameterTypes()
+	  {
+	    List<ParameterType> types = super.getParameterTypes();
+	    
+	    ParameterType connection = new ParameterTypeConfigurable("PARAMETER_CONNECTION", I18N.getMessage(I18N.getGUIBundle(), "gui.parameter.elasticsearch.connection.message", new Object[0]), "elasticsearch");
+	    
+	    connection.setOptional(false);
+	    connection.setExpert(false);
+	    types.add(connection);
+	    
+//	    types.addAll(this.attrSelector.getParameterTypes());
+	    return types;
+	  }
 }
