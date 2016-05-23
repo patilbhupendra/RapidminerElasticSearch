@@ -10,6 +10,7 @@ import com.rapidminer.example.ExampleSet;
 import com.rapidminer.operator.OperatorDescription;
 import com.rapidminer.operator.OperatorException;
 
+import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
@@ -51,6 +52,9 @@ import com.rapidminer.example.table.MemoryExampleTable;
 import com.rapidminer.operator.OperatorDescription;
 import com.rapidminer.operator.OperatorException;
 import com.rapidminer.parameter.ParameterType;
+import com.rapidminer.parameter.ParameterTypeAttribute;
+import com.rapidminer.parameter.ParameterTypeList;
+import com.rapidminer.parameter.ParameterTypeString;
 import com.rapidminer.tools.I18N;
 import com.rapidminer.tools.Ontology;
 import com.rapidminer.tools.config.ConfigurationManager;
@@ -63,6 +67,10 @@ public class ElasticSearchToExampleSetOperator extends AbstractReader<ExampleSet
 	private static final Logger LOGGER = Logger.getLogger(ElasticSearchToExampleSetOperator.class
             .getName());
 
+	public static final String INDEX_NAMES = "indexnames";
+//	public static final String INDEX_TYPE = "indextype";
+	public static final String FIELDS = "fields";
+	
 	public ElasticSearchToExampleSetOperator(OperatorDescription description)
 		 {
 		super(description, ExampleSet.class);
@@ -72,68 +80,144 @@ public class ElasticSearchToExampleSetOperator extends AbstractReader<ExampleSet
 
 	@Override
 	public ExampleSet read() throws OperatorException {
-		
+	
 		ArrayList<Attribute> attributes = new ArrayList<Attribute>();
-		Attribute dateattribute = AttributeFactory.createAttribute("Text", Ontology.POLYNOMINAL);
-		attributes.add(dateattribute);
-		MemoryExampleTable table = new MemoryExampleTable(attributes);
+		
+	    String indexList  = this.getParameterAsString("INDEX_NAMES");
+	//    String indextypes  = this.getParameterAsString("INDEX_TYPE");
+
+		String fields = this.getParameterAsString("FIELDS");
 		
 		
+		
+		if(!(fields.equals(null)))
+			if(fields.trim().length()>0)
+			{
+				String[] fieldsarray = fields.split(",");
+				Integer counter = 0;
+				for(String x : fieldsarray)
+				{
+				//	Attribute attribute = AttributeFactory.createAttribute(x, Ontology.POLYNOMINAL);
+					
+				//	attributes.add(counter,attribute);
+				//	counter++;
+					
+				}
+			}
+		
+		
+		
+		
+		 MemoryExampleTable table = null; 
+		//	for(Attribute a : table.getAttributes())
+		//	{
+		//		LOGGER.info(a.getName());
+		//	}
+			
 		try
 		{
-		// TODO Auto-generated method stub
-		//TODO figure out which is  the correct setting to use
 		//TODO How does this work on cluster rater than one	
 			
 			ElasticSearchConnection connection = (ElasticSearchConnection)ConfigurationManager.getInstance().lookup("elasticsearch", 
-			        getParameterAsString("PARAMETER_CONNECTION"), getProcess().getRepositoryAccessor());
+					getParameterAsString("PARAMETER_CONNECTION"), getProcess().getRepositoryAccessor());
+			String serverUrl = connection.getParameter("server_url");
+		    String serverPort = connection.getParameter("server_port");
+		    String serverClusterName = connection.getParameter("cluster_name");
 			
-			  String serverUrl = connection.getParameter("server_url");
-			    String serverPort = connection.getParameter("server_port");
-			    String serverClusterName = connection.getParameter("cluster_name");
 			
-		
-		Client client = new ElasticSearchClient(serverUrl, serverPort, serverClusterName).getTransportclient();
-		
-		
-		LOGGER.finest("Done building client");
-		
-		QueryBuilder qb = termQuery("Text","event");
-		
-		LOGGER.finest("Query builder done");
-		
-		SearchResponse scrollResp = client.prepareSearch("twitter5", "twitter")
-			//	.addSort(FieldSortBuilder.DOC_FIELD_NAME, SortOrder.ASC)
-		        .setScroll(new TimeValue(60000))
-		        .addFields("Text")
-		        .setQuery(qb)
-		        .setSize(100).execute().actionGet();
-		LOGGER.finest("scrollresp");
+			Client client = new ElasticSearchClient(serverUrl, serverPort, serverClusterName).getTransportclient();
+			LOGGER.finest("Done building client");
+			SearchRequestBuilder srb = client.prepareSearch();
+			LOGGER.info(srb.toString());
+			if(!(indexList.equals(null)))
+			if(indexList.trim().length()>0)
+			{
+			//	   String FinalListofIndex = "";
+				    if(indexList.trim().length()>0)
+				    {
+				    	String[]  indexlistarray =  indexList.split(",");
+					    for(String x : indexlistarray)
+					    {
+					    	srb.setIndices(x);
+					    }
+				    }
+			}
+			LOGGER.finest("DONE ADDING INDEX LIST");
+	
+			/*
+			if(!(indextypes.equals(null)))
+			if(indextypes.trim().length()>0)
+			    {
+				String[] indextypearray =  indextypes.split(",");
+					    for(String x : indextypearray)
+					    {
+					    	//LOGGER.info(srb.toString());
+					    }
+			    }
+			    */
+			
+			LOGGER.finest("DONE ADDING INDEX TYPES");
+			
+			if(!(fields.equals(null)))
+			if(fields.trim().length()>0)
+			{
+				String[] fieldsarray = fields.split(",");
+				for(String x : fieldsarray)
+				{
+					 srb.addField(x);
+				}
+			}
+		//	MemoryExampleTable table = new MemoryExampleTable(attributes);
+			
+			LOGGER.finest("DONE ADDING FIELDS");
+		//	QueryBuilder qb = termQuery("Text","event");
+			
+			LOGGER.finest("Query builder done");
+			
+			SearchResponse scrollResp = srb
+					.setScroll(new TimeValue(60000))
+					.setSize(100).execute().actionGet();
+			
+	
+			LOGGER.finest("Have the scroll Response with " +  String.valueOf(scrollResp.getHits().totalHits()) + " hits ");
 		
 		//Add transport addresses and do something with the client...
-		
-		
 		// MatchAll on the whole cluster with all default options
-	    LOGGER.finest(String.valueOf(scrollResp.getHits().totalHits()));
-	
 	    //Scroll until no hits are returned
+			Integer rowcounter = 0;
 	    do {
 	        for (SearchHit hit : scrollResp.getHits().getHits()) {
 	            //Handle the hit...
-	        	LOGGER.finest("searchhit");
-		    	
+	        	
+	        	
+	      	
 	        	Set<Map.Entry<String, SearchHitField>> set = hit.getFields().entrySet();
 	        	LOGGER.finest("Size is ");
 	        	LOGGER.finest(String.valueOf(set.size()));
                 Iterator<Map.Entry<String, SearchHitField>> iter = set.iterator();
-                while (iter.hasNext()) {
+                
+                
+                int attcounter = 0;
+                double[] values = new double[set.size()];
+                while (iter.hasNext()) 
+                {
                     SearchHitField field = iter.next().getValue();
                     LOGGER.finest(field.getValue().toString());
-                    double[] values = new double[1];
-					values[0] = attributes.get(0).getMapping().mapString(field.getValue().toString());
-					table.addDataRow(new DoubleArrayDataRow(values));
-                   
+     
+                    if(rowcounter==0)
+    	        	{
+                    Attribute attribute = AttributeFactory.createAttribute(field.name(), Ontology.POLYNOMINAL);
+                    attributes.add(attribute);
+                	table = new MemoryExampleTable(attributes);
+    	        	}
+                    
+                    values[attcounter] = attributes.get(attcounter).getMapping().mapString(field.getValue().toString());
+					attcounter++;
+                
                 }
+                rowcounter++;
+                table.addDataRow(new DoubleArrayDataRow(values));
+                
 	        }
 	        scrollResp = client.prepareSearchScroll(scrollResp.getScrollId()).setScroll(new TimeValue(60000)).execute().actionGet();
 	    } while(scrollResp.getHits().getHits().length != 0); // Zero hits mark the end of the scroll and the while loop.
@@ -141,6 +225,7 @@ public class ElasticSearchToExampleSetOperator extends AbstractReader<ExampleSet
 		}
 		catch(Exception e)
 		{
+			LOGGER.info("Error in query processing");
 			LOGGER.finest(e.getMessage());
 		}
 		return table.createExampleSet();
@@ -156,7 +241,26 @@ public class ElasticSearchToExampleSetOperator extends AbstractReader<ExampleSet
 	    connection.setExpert(false);
 	    types.add(connection);
 	    
-//	    types.addAll(this.attrSelector.getParameterTypes());
+	    ParameterTypeString indexname = new ParameterTypeString("INDEX_NAMES", I18N.getMessage(I18N.getGUIBundle(), "gui.parameter.elasticsearch.ES2ExampleSet.indexlist", new Object[0]));
+	    indexname.setOptional(true);
+	    indexname.setExpert(false);
+	    types.add(indexname);
+	    
+	 //   ParameterTypeString indextype = new ParameterTypeString("INDEX_TYPE", I18N.getMessage(I18N.getGUIBundle(), "gui.parameter.elasticsearch.ES2ExampleSet.indextype", new Object[0]));
+	 //   indextype.setOptional(true);
+	 //   indextype.setExpert(false);
+	 //   types.add(indextype);
+	    
+	    
+	    ParameterTypeString fields = new ParameterTypeString("FIELDS", I18N.getMessage(I18N.getGUIBundle(), "gui.parameter.elasticsearch.ES2ExampleSet.fields", new Object[0]));
+	    fields.setOptional(true);
+	    fields.setExpert(false);
+	    types.add(fields);
+	    
+
+	 
+	   
+	    
 	    return types;
 	  }
 }

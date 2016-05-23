@@ -26,7 +26,11 @@ import com.rapidminer.example.ExampleSet;
 import com.rapidminer.operator.OperatorDescription;
 import com.rapidminer.operator.OperatorException;
 import com.rapidminer.operator.UserError;
+import com.rapidminer.operator.ports.InputPort;
+import com.rapidminer.operator.tools.AttributeSubsetSelector;
 import com.rapidminer.parameter.ParameterType;
+import com.rapidminer.parameter.ParameterTypeAttribute;
+import com.rapidminer.parameter.ParameterTypeEnumeration;
 import com.rapidminer.parameter.ParameterTypeString;
 import com.rapidminer.tools.I18N;
 import com.rapidminer.tools.config.ConfigurationException;
@@ -39,6 +43,10 @@ public class ExampleSetToElasticSearchWriter extends AbstractWriter<ExampleSet> 
 	public static final String PARAMETER_CONNECTION = "Connection";
 	public static final String INDEX_NAME = "indexname";
 	public static final String INDEX_TYPE = "indextype";
+	
+	//public static final String paramkey = "paramkey";
+	
+	
 	
 	
 	  public ExampleSetToElasticSearchWriter(OperatorDescription description)
@@ -104,9 +112,9 @@ public class ExampleSetToElasticSearchWriter extends AbstractWriter<ExampleSet> 
 					bulkRequest.add(client.prepareIndex(indexName, indexType).setSource(json));
 					
 				}
-				LOGGER.info("Attempting to create a Bulk Request");
+				LOGGER.finest("Attempting to create a Bulk Request");
 				BulkResponse bulkResponse = bulkRequest.get();
-				LOGGER.info("Created a Bulk Request");
+				LOGGER.finest("Created a Bulk Request");
 				
 				if (bulkResponse.hasFailures()) {
 				    // process failures by iterating through each bulk response item
@@ -143,6 +151,11 @@ public class ExampleSetToElasticSearchWriter extends AbstractWriter<ExampleSet> 
 	    indextype.setExpert(false);
 	    types.add(indextype);
 
+	  //  ParameterTypeAttribute parametertypeattribue  = new ParameterTypeAttribute("paramkey", "descr",exampleSetInput  );
+	 //   types.add(parametertypeattribue);
+	    
+	//    ParameterTypeEnumeration paramenumer = new AttributeSubsetSelector("key","deded'")
+	    
 	    return types;
 	  }
 	  
