@@ -60,7 +60,7 @@ public class ElasticSearchConnectionConfigurator extends
 	    
 	    
 	    ParameterTypeString paramPort = new ParameterTypeString("server_port", I18N_CONF_PORT, false, false);
-	    paramPort.setDefaultValue("9200");
+	    paramPort.setDefaultValue("9300");
 	    parameterTypes.add(paramPort);
 	    
 	    
