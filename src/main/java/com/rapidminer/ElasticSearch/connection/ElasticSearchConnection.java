@@ -1,10 +1,16 @@
 package com.rapidminer.ElasticSearch.connection;
 
+import java.awt.List;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.net.InetAddress;
 import java.util.logging.Logger;
 
+import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.cluster.metadata.MetaData;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 
@@ -31,6 +37,28 @@ public class ElasticSearchConnection extends AbstractConfigurable {
 	  {
 	    return this.testAction;
 	  }
+	 
+	 public String[] getListofIndexes(Client client)
+		{
+			MetaData metadata =  client.admin().cluster()
+				    .prepareState().execute()
+				    .actionGet().getState()
+				    .getMetaData();
+					
+					CreateIndexRequest request = new CreateIndexRequest();
+				//	request.
+					//client.admin().indices().create(request)
+					
+					String[] availableIndexes =  metadata.getConcreteAllIndices();
+					
+					return availableIndexes;
+					
+				
+					
+					/***********************************************************************/
+					
+		}
+	 
 	 
 	public ElasticSearchConnection()
 	{
