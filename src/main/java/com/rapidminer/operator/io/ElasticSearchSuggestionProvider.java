@@ -1,38 +1,19 @@
 package com.rapidminer.operator.io;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.elasticsearch.client.Client;
 
 import com.rapidminer.ElasticSearch.connection.ElasticSearchClient;
 import com.rapidminer.ElasticSearch.connection.ElasticSearchConnection;
-import com.rapidminer.operator.Operator;
-import com.rapidminer.tools.I18N;
-import com.rapidminer.tools.ProgressListener;
-import com.rapidminer.tools.config.ConfigurationManager;
 import com.rapidminer.gui.tools.ResourceAction;
 import com.rapidminer.operator.Operator;
 import com.rapidminer.parameter.SuggestionProvider;
-import com.rapidminer.parameter.UndefinedParameterError;
 import com.rapidminer.tools.I18N;
-import com.rapidminer.tools.LogService;
-import com.rapidminer.tools.ParameterService;
 import com.rapidminer.tools.ProgressListener;
-import com.rapidminer.tools.config.ConfigurationException;
-import com.rapidminer.tools.config.ConfigurationManager;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.rapidminer.tools.config.ConfigurationManager;
 
 
@@ -90,6 +71,11 @@ public class ElasticSearchSuggestionProvider implements SuggestionProvider<Strin
 		    	
 		    	//ElasticSearchConnection connection = (ElasticSearchConnection)ConfigurationManager.getInstance().lookup("elasticsearch", 
 				//		getParameterAsString("PARAMETER_CONNECTION"), getProcess().getRepositoryAccessor());
+		    	
+		    	
+		    	
+		    
+		    	
 		    	
 		    			    	
 				String serverUrl = connection.getParameter("server_url");

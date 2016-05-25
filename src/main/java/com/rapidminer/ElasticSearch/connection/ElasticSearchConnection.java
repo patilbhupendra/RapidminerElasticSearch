@@ -51,6 +51,8 @@ public class ElasticSearchConnection extends AbstractConfigurable {
 					
 					String[] availableIndexes =  metadata.getConcreteAllIndices();
 					
+					
+					
 					return availableIndexes;
 					
 				

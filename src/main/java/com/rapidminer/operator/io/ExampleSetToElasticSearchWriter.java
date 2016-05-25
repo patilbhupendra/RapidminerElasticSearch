@@ -4,14 +4,30 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
+import java.io.IOException;
+
+import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequestBuilder;
+import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
+import org.elasticsearch.action.get.GetRequestBuilder;
+import org.elasticsearch.action.get.GetResponse;
+import org.elasticsearch.action.index.IndexRequestBuilder;
+import org.elasticsearch.client.Client;
+import org.elasticsearch.client.transport.TransportClient;
+//import org.elasticsearch.common.settings.ImmutableSettings;
+import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.apache.commons.collections15.IteratorUtils;
+import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.client.Client;
-
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.*;
 import com.rapidminer.ElasticSearch.connection.ElasticSearchClient;
 import com.rapidminer.ElasticSearch.connection.ElasticSearchConnection;
 import com.rapidminer.example.Attribute;
@@ -82,7 +98,12 @@ public class ExampleSetToElasticSearchWriter extends AbstractWriter<ExampleSet> 
 			final Iterator<Example> examples = exampleSet.iterator();
 			BulkRequestBuilder bulkRequest = client.prepareBulk();
 
-			
+			/***********************************************************************
+			 * code to handle mappings 
+			 */
+			final CreateIndexRequestBuilder createIndexRequestBuilder = client.admin().indices().prepareCreate(indexName);
+			XContentBuilder mappingBuilder = BuildMapping(client,indexName, attributesList);
+			createIndexRequestBuilder.addMapping(indexType, mappingBuilder);
 			
 			while(examples.hasNext())
 			{
@@ -96,7 +117,9 @@ public class ExampleSetToElasticSearchWriter extends AbstractWriter<ExampleSet> 
 					
 				}
 				LOGGER.finest(json.toString());
-				  bulkRequest.add(client.prepareIndex(indexName, indexType).setSource(json));
+				bulkRequest.add(client.prepareIndex(indexName, indexType).setSource(json));
+				  
+								 
 				//  IndexRequestBuilder irb = client.prepareIndex().
 			}//while
 			LOGGER.finest("Attempting to create a Bulk Request");
@@ -115,10 +138,72 @@ public class ExampleSetToElasticSearchWriter extends AbstractWriter<ExampleSet> 
 		{
 			LOGGER.info("Exception in writing");
 			LOGGER.info(e.getMessage());
+			//LOGGER.info(e.);
 		}
 		return null;
 	}//write
 
+	public XContentBuilder BuildMapping(Client client, String indexName,java.util.List<Attribute> attributesList)
+	{
+		XContentBuilder mappingBuilder;
+		try
+		{
+		
+		LOGGER.finest("Done building CreateIndexRequestBuilder");
+		  mappingBuilder = jsonBuilder().startObject().startObject("mappings").startObject("properties");
+			LOGGER.finest("Done XContentBuilder");
+		for(Attribute att :attributesList)
+		{
+			LOGGER.finest("Adding type for " + att.getName());
+			//final XContentBuilder mappingBuilder = jsonBuilder().startObject().startObject(documentType)
+			 //mappingBuilder = 
+			String valuetype = "string";
+			
+			switch (att.getValueType())
+			{
+			case Ontology.DATE :
+			case Ontology.DATE_TIME : 
+				valuetype= "date";
+				break ;
+			case Ontology.BINOMINAL:
+				valuetype = "boolean";
+				break;
+			case Ontology.POLYNOMINAL:
+			case Ontology.NOMINAL :
+				valuetype = "string";
+				break;
+			case Ontology.NUMERICAL:
+				valuetype = "double";
+				break;
+			case Ontology.INTEGER :
+				valuetype= "long";
+				break;
+			case Ontology.REAL:
+				valuetype = "double";
+				break;
+			case Ontology.STRING:
+				valuetype = "string";
+			case Ontology.TIME:
+				valuetype = "date";
+				default:
+					valuetype = "string";
+					
+			}
+				 mappingBuilder.startObject(att.getName()).field("type", att.getValueType()).endObject();
+					 
+			 LOGGER.finest("DoneAdding type for " + att.getName());
+		 
+	     	
+		}
+				mappingBuilder.endObject().endObject().endObject();
+		}
+		catch(Exception e)
+		{
+			LOGGER.info("Exception in building maps");
+			 mappingBuilder = null;
+		}
+				return mappingBuilder;
+	}
 
 	public List<ParameterType> getParameterTypes()
 	{
