@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
+import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
@@ -47,6 +48,7 @@ public class ElasticSearchToExampleSetOperator extends
 	private static final Logger LOGGER = Logger
 			.getLogger(ElasticSearchToExampleSetOperator.class.getName());
 	public static final String INDEX_NAMES = "indexnames";
+	public static final String INDEX_TYPES = "indextypes";
 	public static final String FIELDS = "fields";
 	public static final String INDEXSUGGESTIONS = "indexsuggestion";
 
@@ -61,6 +63,7 @@ public class ElasticSearchToExampleSetOperator extends
 
 		String indexList = this.getParameterAsString("INDEX_NAMES");
 		String fields = this.getParameterAsString("FIELDS");
+		String indexTypes = this.getParameterAsString("INDEX_TYPES");
 		String indexsuggestion = this.getParameterAsString("INDEXSUGGESTIONS");
 
 		MemoryExampleTable table = null;
@@ -82,13 +85,13 @@ public class ElasticSearchToExampleSetOperator extends
 
 
 
-			LOGGER.finest("Elastic search Client Built. Now prepariing Search request Buolder");
+			LOGGER.finest("Elastic search Client Built. Now prepariing Search request Builder");
 			SearchRequestBuilder srb = client.prepareSearch();
 			srb.setIndices(indexsuggestion);
-			
+			String[] fieldsarray = {};
 			if (!(fields.equals(null)))
 				if (fields.trim().length() > 0) {
-					String[] fieldsarray = fields.split(",");
+					fieldsarray = fields.split(",");
 					for (String x : fieldsarray) {
 						srb.addField(x);
 					}
@@ -101,6 +104,7 @@ public class ElasticSearchToExampleSetOperator extends
 
 			SearchResponse scrollResp = srb.setScroll(new TimeValue(60000))
 					.setSize(100).execute().actionGet();
+			connection.getMappings(client, indexsuggestion, indexTypes, fieldsarray);
 
 			LOGGER.finest("Elastic Search:Have the scroll Response with "
 					+ String.valueOf(scrollResp.getHits().totalHits())
@@ -124,9 +128,11 @@ public class ElasticSearchToExampleSetOperator extends
 						SearchHitField field = iter.next().getValue();
 						// LOGGER.finest(field.getValue().toString());
 
+						
 						if (rowcounter == 0) {
 							Attribute attribute = AttributeFactory
 									.createAttribute(field.name(),
+											
 											Ontology.POLYNOMINAL);
 							attributes.add(attribute);
 							table = new MemoryExampleTable(attributes);
@@ -153,6 +159,8 @@ public class ElasticSearchToExampleSetOperator extends
 			LOGGER.info(e.getMessage());
 			LOGGER.info(e.getStackTrace().toString());
 		}
+		
+		
 		return table.createExampleSet();
 	}
 
@@ -184,6 +192,15 @@ public class ElasticSearchToExampleSetOperator extends
 		fields.setExpert(false);
 		types.add(fields);
 
+		
+		ParameterTypeString indextypes = new ParameterTypeString("INDEX_TYPES",
+				I18N.getMessage(I18N.getGUIBundle(),
+						"gui.parameter.elasticsearch.ES2ExampleSet.fields",
+						new Object[0]));
+		indextypes.setOptional(true);
+		indextypes.setExpert(false);
+		types.add(indextypes);
+		
 		ParameterTypeSuggestion indexsuggestion = new ParameterTypeSuggestion(
 				"INDEXSUGGESTIONS", "TEST INDEX SUGGESTIONS",
 				new ElasticSearchSuggestionProvider(this,

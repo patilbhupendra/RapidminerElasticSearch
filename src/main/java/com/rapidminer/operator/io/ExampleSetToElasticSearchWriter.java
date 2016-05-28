@@ -113,7 +113,41 @@ public class ExampleSetToElasticSearchWriter extends AbstractWriter<ExampleSet> 
 				for(int i=0;i<attributesList.size();i++)
 				{
 					Attribute a =  attributesList.get(i);
-					json.put(a.getName(), currexample.getValueAsString(a) );
+					//json.put(a.getName(), currexample.getValueAsString(a) );
+					
+					switch (a.getValueType())
+					{
+					case Ontology.DATE :
+					case Ontology.DATE_TIME : 
+						json.put(a.getName(), currexample.getDateValue(a) );
+						break ;
+					case Ontology.BINOMINAL:
+						json.put(a.getName(), currexample.getNominalValue(a));
+						break;
+					case Ontology.POLYNOMINAL:
+					case Ontology.NOMINAL :
+						json.put(a.getName(), currexample.getNominalValue(a));
+						break;
+					case Ontology.NUMERICAL:
+						json.put(a.getName(), currexample.getNumericalValue(a));
+						break;
+					case Ontology.INTEGER :
+						json.put(a.getName(), currexample.getNumericalValue(a));
+						break;
+					case Ontology.REAL:
+						json.put(a.getName(), currexample.getNumericalValue(a));
+						break;
+					case Ontology.STRING:
+						json.put(a.getName(), currexample.getNominalValue(a));
+					case Ontology.TIME:
+						json.put(a.getName(), currexample.getDateValue(a) );
+						default:
+							json.put(a.getName(), currexample.getNominalValue(a));
+							
+					}
+					
+					
+					
 					
 				}
 				LOGGER.finest(json.toString());
