@@ -17,7 +17,10 @@ import org.elasticsearch.cluster.metadata.MetaData;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
+import com.rapidminer.MacroHandler;
 import com.rapidminer.ElasticSearch.connection.ElasticSearchClient;
 import com.rapidminer.ElasticSearch.connection.ElasticSearchConnection;
 import com.rapidminer.example.Attribute;
@@ -28,10 +31,21 @@ import com.rapidminer.example.table.MemoryExampleTable;
 import com.rapidminer.operator.Operator;
 import com.rapidminer.operator.OperatorDescription;
 import com.rapidminer.operator.OperatorException;
+import com.rapidminer.operator.tools.AttributeSubsetSelector;
 import com.rapidminer.parameter.ParameterType;
+import com.rapidminer.parameter.ParameterTypeAttribute;
+import com.rapidminer.parameter.ParameterTypeAttributes;
+import com.rapidminer.parameter.ParameterTypeEnumeration;
+import com.rapidminer.parameter.ParameterTypeList;
 import com.rapidminer.parameter.ParameterTypeString;
+import com.rapidminer.parameter.ParameterTypeStringCategory;
 import com.rapidminer.parameter.ParameterTypeSuggestion;
 import com.rapidminer.parameter.UndefinedParameterError;
+import com.rapidminer.parameter.conditions.BooleanParameterCondition;
+import com.rapidminer.parameter.conditions.NonEqualStringCondition;
+
+import com.rapidminer.parameter.conditions.ParameterCondition;
+
 import com.rapidminer.repository.RepositoryAccessor;
 import com.rapidminer.tools.I18N;
 import com.rapidminer.tools.Ontology;
@@ -39,10 +53,11 @@ import com.rapidminer.tools.ProgressListener;
 import com.rapidminer.tools.config.ConfigurationManager;
 import com.rapidminer.tools.config.ParameterTypeConfigurable;
 
+
 //import java.awt.List;
 
 public class ElasticSearchToExampleSetOperator extends
-		AbstractReader<ExampleSet> implements ESParameterProvider {
+AbstractReader<ExampleSet> implements ESParameterProvider {
 
 	public static final String PARAMETER_CONNECTION = "Connection";
 	private static final Logger LOGGER = Logger
@@ -51,6 +66,7 @@ public class ElasticSearchToExampleSetOperator extends
 	public static final String INDEX_TYPES = "indextypes";
 	public static final String FIELDS = "fields";
 	public static final String INDEXSUGGESTIONS = "indexsuggestion";
+	public static final String FIELDNAMES = "fieldnames";
 
 	public ElasticSearchToExampleSetOperator(OperatorDescription description) {
 		super(description, ExampleSet.class);
@@ -65,6 +81,13 @@ public class ElasticSearchToExampleSetOperator extends
 		String fields = this.getParameterAsString("FIELDS");
 		String indexTypes = this.getParameterAsString("INDEX_TYPES");
 		String indexsuggestion = this.getParameterAsString("INDEXSUGGESTIONS");
+		String[] fieldList = ParameterTypeEnumeration
+				.transformString2Enumeration(getParameterAsString("FIELDNAMES"));
+
+		for(String s: fieldList)
+		{
+			LOGGER.info("selected column is : " + s);
+		}
 
 		MemoryExampleTable table = null;
 
@@ -81,10 +104,6 @@ public class ElasticSearchToExampleSetOperator extends
 			Client client = new ElasticSearchClient(serverUrl, serverPort,
 					serverClusterName).getTransportclient();
 
-			/***********************************************************************/
-
-
-
 			LOGGER.finest("Elastic search Client Built. Now prepariing Search request Builder");
 			SearchRequestBuilder srb = client.prepareSearch();
 			srb.setIndices(indexsuggestion);
@@ -97,6 +116,7 @@ public class ElasticSearchToExampleSetOperator extends
 					}
 				}
 
+
 			LOGGER.finest("Elastic Search: Added fields parameter to the Search Request Builder");
 			// QueryBuilder qb = termQuery("Text","event");
 
@@ -104,7 +124,7 @@ public class ElasticSearchToExampleSetOperator extends
 
 			SearchResponse scrollResp = srb.setScroll(new TimeValue(60000))
 					.setSize(100).execute().actionGet();
-			connection.getMappings(client, indexsuggestion, indexTypes, fieldsarray);
+			Map<String, String> fieldTypes = connection.getMappings(client, indexsuggestion, indexTypes, fieldsarray);
 
 			LOGGER.finest("Elastic Search:Have the scroll Response with "
 					+ String.valueOf(scrollResp.getHits().totalHits())
@@ -126,23 +146,59 @@ public class ElasticSearchToExampleSetOperator extends
 					double[] values = new double[set.size()];
 					while (iter.hasNext()) {
 						SearchHitField field = iter.next().getValue();
-						// LOGGER.finest(field.getValue().toString());
+						{
+							String fieldtype = "string";
+							if(fieldTypes.containsKey(field.name()))
+							{
+								fieldtype = fieldTypes.get(field.name());
+							}
+							else
+							{
+								LOGGER.finest("could not find key for > " + field.name());
+							}
+							Attribute attribute;
+							switch(fieldtype)
+							{
+							case "string":
+								if (rowcounter == 0)
+								{
+									attribute = AttributeFactory.createAttribute(field.name(),Ontology.POLYNOMINAL);
+									attributes.add(attribute);
+								}
+								values[attcounter] = attributes.get(attcounter).getMapping().mapString(field.getValue().toString());
+								break;
 
-						
-						if (rowcounter == 0) {
-							Attribute attribute = AttributeFactory
-									.createAttribute(field.name(),
-											
-											Ontology.POLYNOMINAL);
-							attributes.add(attribute);
-							table = new MemoryExampleTable(attributes);
+							case "double" :
+								if (rowcounter == 0){
+									attribute = AttributeFactory.createAttribute(field.name(),Ontology.REAL);
+									attributes.add(attribute);
+								}
+								values[attcounter] = field.getValue();
+								break;
+
+							case "datetime":
+								if (rowcounter == 0){
+									attribute = AttributeFactory.createAttribute(field.name(),Ontology.DATE_TIME);
+									attributes.add(attribute);
+									LOGGER.info("created a date field");
+								}
+								values[attcounter] = field.getValue(); 
+								break;
+							default:
+								if (rowcounter == 0){
+									attribute = AttributeFactory.createAttribute(field.name(),Ontology.POLYNOMINAL);
+									attributes.add(attribute);
+								}
+								values[attcounter] = attributes.get(attcounter).getMapping().mapString(field.getValue().toString());
+								break;
+
+							}
 						}
-
-						values[attcounter] = attributes.get(attcounter)
-								.getMapping()
-								.mapString(field.getValue().toString());
 						attcounter++;
-
+					}
+					if (rowcounter == 0)
+					{
+						table = new MemoryExampleTable(attributes);
 					}
 					rowcounter++;
 					table.addDataRow(new DoubleArrayDataRow(values));
@@ -159,8 +215,8 @@ public class ElasticSearchToExampleSetOperator extends
 			LOGGER.info(e.getMessage());
 			LOGGER.info(e.getStackTrace().toString());
 		}
-		
-		
+
+
 		return table.createExampleSet();
 	}
 
@@ -176,13 +232,28 @@ public class ElasticSearchToExampleSetOperator extends
 		connection.setExpert(false);
 		types.add(connection);
 
-		ParameterTypeString indexname = new ParameterTypeString("INDEX_NAMES",
+		//	ParameterTypeString indexname = new ParameterTypeString("INDEX_NAMES",
+		//			I18N.getMessage(I18N.getGUIBundle(),
+		//					"gui.parameter.elasticsearch.ES2ExampleSet.indexlist",
+		//					new Object[0]));
+		//	indexname.setOptional(true);
+		//	indexname.setExpert(false);
+		//	types.add(indexname);
+		ParameterTypeString indextypes = new ParameterTypeString("INDEX_TYPES",
 				I18N.getMessage(I18N.getGUIBundle(),
-						"gui.parameter.elasticsearch.ES2ExampleSet.indexlist",
+						"gui.parameter.elasticsearch.ES2ExampleSet.fields",
 						new Object[0]));
-		indexname.setOptional(true);
-		indexname.setExpert(false);
-		types.add(indexname);
+		indextypes.setOptional(true);
+		indextypes.setExpert(false);
+		types.add(indextypes);
+
+		ParameterTypeSuggestion indexsuggestion = new ParameterTypeSuggestion(
+				"INDEXSUGGESTIONS", "TEST INDEX SUGGESTIONS",
+				new ElasticSearchSuggestionProvider(this,
+						ElasticSearchSuggestionProvider.Type.INDEX));
+
+		types.add(indexsuggestion);
+
 
 		ParameterTypeString fields = new ParameterTypeString("FIELDS",
 				I18N.getMessage(I18N.getGUIBundle(),
@@ -192,36 +263,13 @@ public class ElasticSearchToExampleSetOperator extends
 		fields.setExpert(false);
 		types.add(fields);
 
-		
-		ParameterTypeString indextypes = new ParameterTypeString("INDEX_TYPES",
-				I18N.getMessage(I18N.getGUIBundle(),
-						"gui.parameter.elasticsearch.ES2ExampleSet.fields",
-						new Object[0]));
-		indextypes.setOptional(true);
-		indextypes.setExpert(false);
-		types.add(indextypes);
-		
-		ParameterTypeSuggestion indexsuggestion = new ParameterTypeSuggestion(
-				"INDEXSUGGESTIONS", "TEST INDEX SUGGESTIONS",
-				new ElasticSearchSuggestionProvider(this,
-						ElasticSearchSuggestionProvider.Type.INDEX));
-
-		types.add(indexsuggestion);
 
 		return types;
 	}
 
-	// @Override
-	// public String getCollectionName() throws UndefinedParameterError {
-	// // TODO Auto-generated method stub
-	// return null;
-	// }
-
 	public String getConfigurableName() throws UndefinedParameterError {
 		return getParameterAsString("Connection");
 	}
-
-
 
 	@Override
 	public RepositoryAccessor getRepositoryAccessor() {
