@@ -4,30 +4,30 @@
               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
               xsi:schemaLocation="http://rapid-i.com/schemas/documentation/reference/1.0 ">
 
-    <operator key="operator.elastic_search:example_operator_key" locale="en"
-              version="6.0.000">
-        <title>Search Elastic Search</title>
-        <synopsis>This is an example Operator. It does nothing when being executed.
+    <!-- operator key="operator:example_operator_key" locale="en"             version="6.0.000">-->
+    <operator key="operator:example_operator_key" locale="en"  version="6.0.000">-->
+        <title>Read from Elastic Search</title>
+        <synopsis>Operator to read from Elastic Search.
         </synopsis>
-        <text>
+      <!--  <text>
             <paragraph>First paragraph.</paragraph>
             <paragraph>Second paragraph.</paragraph>
-        </text>
+        </text>-->
         <inputPorts>
-            <port name="input" type="com.rapidminer.example.ExampleSet">
+          <!--  <port name="input" type="com.rapidminer.example.ExampleSet">
                 Input port description.
-            </port>
+            </port>-->
         </inputPorts>
         <outputPorts>
             <port name="output" type="com.rapidminer.example.ExampleSet">
-                Output port description.
+                Exampleset returned from ElasticSearch.
             </port>
         </outputPorts>
 
         <!-- description of the parameters and the corresponding values -->
         <parameters>
-            <parameter key="first_parameter" type="configurable">
-                Description here
+            <parameter key="Connection" type="configurable">
+                Select ElasticSearch Connection you want to use. You can create one from here.
             </parameter>
             <parameter key="second_parameter" type="selection">
                 Description here

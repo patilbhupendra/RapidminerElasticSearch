@@ -70,7 +70,7 @@ AbstractReader<ExampleSet> implements ESParameterProvider {
 //	public static final String INDEX_NAMES = "indexnames";
 	public static final String INDEX_TYPES = "indextypes";
 	public static final String FIELDS = "fields";
-	public static final String INDEXSUGGESTIONS = "indexsuggestion";
+	public static final String SELECT_INDEX = "indexsuggestion";
 	
 	//public static final String FIELDNAMES = "fieldnames";
 	
@@ -90,7 +90,7 @@ AbstractReader<ExampleSet> implements ESParameterProvider {
 		String fields = this.getParameterAsString("FIELDS");
 		LOGGER.info("thses are the fielsds" + fields);
 		String indexTypes = this.getParameterAsString("INDEX_TYPES");
-		String indexsuggestion = this.getParameterAsString("INDEXSUGGESTIONS");
+		String indexsuggestion = this.getParameterAsString("SELECT_INDEX");
 		Integer numberofrowsrequested = 1;
 		try
 		{
@@ -276,11 +276,7 @@ AbstractReader<ExampleSet> implements ESParameterProvider {
 		connection.setExpert(false);
 		types.add(connection);
 
-		ParameterTypeInt numberofrows = new  ParameterTypeInt("ROWCOUNT","number of rows you want to retrieve",1,Integer.MAX_VALUE);
-		numberofrows.setOptional(true);
-		numberofrows.setExpert(false);
-		types.add(numberofrows);
-		
+	
 		//	ParameterTypeString indexname = new ParameterTypeString("INDEX_NAMES",
 		//			I18N.getMessage(I18N.getGUIBundle(),
 		//					"gui.parameter.elasticsearch.ES2ExampleSet.indexlist",
@@ -288,31 +284,23 @@ AbstractReader<ExampleSet> implements ESParameterProvider {
 		//	indexname.setOptional(true);
 		//	indexname.setExpert(false);
 		//	types.add(indexname);
-		ParameterTypeString indextypes = new ParameterTypeString("INDEX_TYPES",
-				I18N.getMessage(I18N.getGUIBundle(),
-						"gui.parameter.elasticsearch.ES2ExampleSet.fields",
-						new Object[0]));
+		
+		ParameterTypeSuggestion indexsuggestion = new ParameterTypeSuggestion(
+				"SELECT_INDEX", "Select an index you want to get the data from",
+				new ElasticSearchSuggestionProvider(this,
+						ElasticSearchSuggestionProvider.Type.INDEX));
+	
+		types.add(indexsuggestion);
+		
+		ParameterTypeString indextypes = new ParameterTypeString("INDEX_TYPES",I18N.getMessage(I18N.getGUIBundle(),"gui.parameter.elasticsearch.ES2ExampleSet.indextype",new Object[0]));
+		//ParameterTypeString indextypes = new ParameterTypeString("INDEX_TYPES","Comma Seperated List of Fileds to retrieve "));
 		indextypes.setOptional(true);
 		indextypes.setExpert(false);
 		types.add(indextypes);
 
-		ParameterTypeSuggestion indexsuggestion = new ParameterTypeSuggestion(
-				"INDEXSUGGESTIONS", "Select an index you want to get the data from",
-				new ElasticSearchSuggestionProvider(this,
-						ElasticSearchSuggestionProvider.Type.INDEX));
 
-		
-		//ParameterTypeTupel
-		
-		
-		
-		types.add(indexsuggestion);
-
-
-		ParameterTypeString fields = new ParameterTypeString("FIELDS",
-				I18N.getMessage(I18N.getGUIBundle(),
-						"gui.parameter.elasticsearch.ES2ExampleSet.fields",
-						new Object[0]));
+	//	ParameterTypeString fields = new ParameterTypeString("FIELDS",I18N.getMessage(I18N.getGUIBundle(),"gui.parameter.elasticsearch.ES2ExampleSet.fields",new Object[0]));
+		ParameterTypeString fields = new ParameterTypeString("FIELDS","Enter Comma seperated list of fields to retrieve");
 		fields.setOptional(false);
 		fields.setExpert(false);
 		types.add(fields);
@@ -320,11 +308,16 @@ AbstractReader<ExampleSet> implements ESParameterProvider {
 		//
 		//MetaDataProvider provider = new MetaDataProvider();
 		//new ParameterTypeAttribute(key, description, metaDataProvider, optional, valueTypes)
-		//fields.registerDependencyCondition(new NonEqualStringCondition(this,INDEXSUGGESTIONS,false,CONDITION_INPUT_EXISTS));
+		//fields.registerDependencyCondition(new NonEqualStringCondition(this,SELECT_INDEX,false,CONDITION_INPUT_EXISTS));
 		//String[] mycatarray = {"apples","oranges"};
 		//	ParameterTypeStringCategory  category = new ParameterTypeStringCategory("categorykeys","categorydesc",mycatarray);
 		//	types.add(category);
 		//	ParameterTypeList list1 = new ParameterTypeList() 
+		ParameterTypeInt numberofrows = new  ParameterTypeInt("ROWCOUNT","Number of rows you want to retrieve",1,Integer.MAX_VALUE);
+		numberofrows.setOptional(true);
+		numberofrows.setExpert(false);
+		types.add(numberofrows);
+		
 		
 		return types;
 	}
