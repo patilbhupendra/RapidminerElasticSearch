@@ -77,6 +77,14 @@ AbstractReader<ExampleSet> implements ESParameterProvider {
 	public static final String CONDITION_INPUT_EXISTS = "";
 	public static final String ROWCOUNT = "numberofrows";
 
+	
+	//public static final String SEARCH_NAME = "search_name";
+	//public static final String SEARCH_VALUE = "search_value";
+	
+	public static final String SEARCH_JSON = "search_json";
+
+	
+	
 	public ElasticSearchToExampleSetOperator(OperatorDescription description) {
 		super(description, ExampleSet.class);
 	}
@@ -91,6 +99,9 @@ AbstractReader<ExampleSet> implements ESParameterProvider {
 		LOGGER.info("thses are the fielsds" + fields);
 		String indexTypes = this.getParameterAsString("INDEX_TYPES");
 		String indexsuggestion = this.getParameterAsString("SELECT_INDEX");
+		
+		String searchJson = this.getParameterAsString("SEARCH_JSON");
+		
 		Integer numberofrowsrequested = 1;
 		try
 		{
@@ -107,16 +118,7 @@ AbstractReader<ExampleSet> implements ESParameterProvider {
 			 numberofrowsrequested = 10;
 		}
 
-		LOGGER.info("rowcount is + " + Integer.toString(numberofrowsrequested));
-		
-		
-	//String[] fieldList = ParameterTypeEnumeration
-	//			.transformString2Enumeration(getParameterAsString(FIELDNAMES));
-
-	//	for(String s: fieldList)
-	//	{
-	//		LOGGER.info("selected column is : " + s);
-	//	}
+	
 
 				
 		MemoryExampleTable table = null;
@@ -139,23 +141,37 @@ AbstractReader<ExampleSet> implements ESParameterProvider {
 			SearchRequestBuilder srb = client.prepareSearch();
 			srb.setIndices(indexsuggestion);
 		
-			
+		
+			///srb.setQuery(query)
 			
 			String[] fieldsarray = {};
-			if (!(fields.equals(null)))
+			if(fields != null && !fields.isEmpty())
+			//if (!(fields.isEmpty()))
 				if (fields.trim().length() > 0) {
 					fieldsarray = fields.split(",");
 					for (String x : fieldsarray) {
 						srb.addField(x);
-						LOGGER.info(" added field"+ x);
+						//LOGGER.info(" added field"+ x);
 					}
 				}
 
 
 			LOGGER.finest("Elastic Search: Added fields parameter to the Search Request Builder");
+			
+			if(searchJson != null && !searchJson.isEmpty())
+				//if(!searchJson.isEmpty())
+					{
+					LOGGER.info("Found search Json as =>" + searchJson);
+					srb.setQuery(searchJson);
+				}
+				else
+				{
+					LOGGER.info("Did not find Found search Json =>");
+				}
+				
 			// QueryBuilder qb = termQuery("Text","event");
 
-			
+			//QueryBuilders.
 			
 			LOGGER.finest("Query builder done");
 
@@ -305,14 +321,23 @@ AbstractReader<ExampleSet> implements ESParameterProvider {
 		fields.setExpert(false);
 		types.add(fields);
 		
-		//
-		//MetaDataProvider provider = new MetaDataProvider();
-		//new ParameterTypeAttribute(key, description, metaDataProvider, optional, valueTypes)
-		//fields.registerDependencyCondition(new NonEqualStringCondition(this,SELECT_INDEX,false,CONDITION_INPUT_EXISTS));
-		//String[] mycatarray = {"apples","oranges"};
-		//	ParameterTypeStringCategory  category = new ParameterTypeStringCategory("categorykeys","categorydesc",mycatarray);
-		//	types.add(category);
-		//	ParameterTypeList list1 = new ParameterTypeList() 
+		ParameterTypeString searchJSon = new ParameterTypeString("SEARCH_JSON","Enter the JSON of search query");
+		searchJSon.setOptional(true);
+		searchJSon.setExpert(true);
+		types.add(searchJSon);
+		
+		//ParameterType valueType = new ParameterTypeString(SEARCH_NAME,"function to call",false);
+		//List<String[]> defaultList = new ArrayList<String[]>(); 
+		//String[] name ={"apples","oranges"};
+		//String[] name2 ={"apples2","oranges2"};
+		//defaultList.add(name);
+		//defaultList.add(name2);
+				
+		//ParameterTypeList searchList = new ParameterTypeList("SearchList", "SearchListdescrib", valueType, new ParameterTypeString(SEARCH_VALUE,
+		//		"The value of the annotation", false),defaultList, false) ;
+		//types.add(searchList);
+		
+		
 		ParameterTypeInt numberofrows = new  ParameterTypeInt("ROWCOUNT","Number of rows you want to retrieve",1,Integer.MAX_VALUE);
 		numberofrows.setOptional(true);
 		numberofrows.setExpert(false);
