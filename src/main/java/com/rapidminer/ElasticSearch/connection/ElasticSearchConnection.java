@@ -78,6 +78,10 @@ public class ElasticSearchConnection extends AbstractConfigurable {
 				.actionGet().getState()
 				.getMetaData();
 
+		LOGGER.info("ddd index is " + indexName);
+		LOGGER.info("ddd type is " + type);
+		LOGGER.info("ddd fieldsarray" + fieldsarray[0]);
+		
 		String[] indices = {indexName};
 		String[] types = {type};
 		Map<String, String> fieldTypes = new HashMap<>();
