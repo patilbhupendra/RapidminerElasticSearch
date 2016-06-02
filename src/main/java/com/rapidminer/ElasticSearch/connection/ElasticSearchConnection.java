@@ -1,59 +1,25 @@
 package com.rapidminer.ElasticSearch.connection;
 
-import groovy.json.JsonBuilder;
-import groovy.json.JsonParserType;
-
-import java.awt.List;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Map;
-import java.util.Set;
-import java.net.InetAddress;
 import java.util.logging.Logger;
 
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
-import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsAction;
-import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsRequest;
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.cluster.metadata.MetaData;
-import org.elasticsearch.common.collect.ImmutableOpenMap;
-import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
-
-
-
-
-
-
 import org.elasticsearch.common.xcontent.support.XContentMapValues;
 
-import com.carrotsearch.hppc.cursors.ObjectObjectCursor;
-import com.fasterxml.jackson.core.*;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-//import org.codehaus.jackson.map.ObjectMapper;
-
-
-//import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonAnyFormatVisitor;
-//import org.codehaus.jackson.JsonParser;
-//import org.codehaus.*;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rapidminer.operator.io.ExampleSetToElasticSearchWriter;
 import com.rapidminer.tools.I18N;
 import com.rapidminer.tools.config.AbstractConfigurable;
 import com.rapidminer.tools.config.TestConfigurableAction;
 import com.rapidminer.tools.config.actions.ActionResult;
 import com.rapidminer.tools.config.actions.SimpleActionResult;
+//import org.codehaus.jackson.map.ObjectMapper;
+//import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonAnyFormatVisitor;
+//import org.codehaus.jackson.JsonParser;
+//import org.codehaus.*;
 
 public class ElasticSearchConnection extends AbstractConfigurable {
 

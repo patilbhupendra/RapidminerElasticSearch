@@ -5,9 +5,10 @@
               xsi:schemaLocation="http://rapid-i.com/schemas/documentation/reference/1.0 ">
 
     <!-- operator key="operator:example_operator_key" locale="en"             version="6.0.000">-->
-    <operator key="operator:example_operator_key" locale="en"  version="6.0.000">-->
+    <operator key="operator:example_operator_key" locale="en"  version="6.0.000">
         <title>Read from Elastic Search</title>
-        <synopsis>Operator to read from Elastic Search.
+        <synopsis>This operate can be used to read from Elastic Search Indices. The user will have to define a new connection if one is already not defined.
+        Once a valid connection is defined, user can Select index and provide additional details to retreive data from ElasticIndex
         </synopsis>
       <!--  <text>
             <paragraph>First paragraph.</paragraph>
@@ -29,11 +30,15 @@
             <parameter key="Connection" type="configurable">
                 Select ElasticSearch Connection you want to use. You can create one from here.
             </parameter>
-            <parameter key="second_parameter" type="selection">
-                Description here
+            <parameter key="indexsuggestion" type="selection">
+                Select Index you want to retreive data from
+            </parameter>
+            
+            <parameter key="indextypes" type="">
+                Enter the name of the index type
             </parameter>
             <parameter key="third_parameter" type="">
-                Description here
+                Enter the name of the index type
             </parameter>
         </parameters>
 

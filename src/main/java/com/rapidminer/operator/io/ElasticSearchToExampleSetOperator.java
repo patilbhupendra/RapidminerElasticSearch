@@ -2,27 +2,18 @@ package com.rapidminer.operator.io;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import org.apache.lucene.search.TermQuery;
-import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
-import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.cluster.metadata.MetaData;
 import org.elasticsearch.common.unit.TimeValue;
-import org.elasticsearch.index.search.MultiMatchQuery.QueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
-import com.rapidminer.MacroHandler;
 import com.rapidminer.ElasticSearch.connection.ElasticSearchClient;
 import com.rapidminer.ElasticSearch.connection.ElasticSearchConnection;
 import com.rapidminer.example.Attribute;
@@ -30,34 +21,18 @@ import com.rapidminer.example.ExampleSet;
 import com.rapidminer.example.table.AttributeFactory;
 import com.rapidminer.example.table.DoubleArrayDataRow;
 import com.rapidminer.example.table.MemoryExampleTable;
-import com.rapidminer.operator.Operator;
 import com.rapidminer.operator.OperatorDescription;
 import com.rapidminer.operator.OperatorException;
-import com.rapidminer.operator.tools.AttributeSubsetSelector;
-import com.rapidminer.parameter.ParameterHandler;
 import com.rapidminer.parameter.ParameterType;
-import com.rapidminer.parameter.ParameterTypeAttribute;
-import com.rapidminer.parameter.ParameterTypeAttributes;
-import com.rapidminer.parameter.ParameterTypeEnumeration;
 import com.rapidminer.parameter.ParameterTypeInt;
-import com.rapidminer.parameter.ParameterTypeList;
-import com.rapidminer.parameter.ParameterTypeNumber;
 import com.rapidminer.parameter.ParameterTypeString;
-import com.rapidminer.parameter.ParameterTypeStringCategory;
 import com.rapidminer.parameter.ParameterTypeSuggestion;
-import com.rapidminer.parameter.ParameterTypeTupel;
 import com.rapidminer.parameter.UndefinedParameterError;
-import com.rapidminer.parameter.conditions.BooleanParameterCondition;
-import com.rapidminer.parameter.conditions.NonEqualStringCondition;
-import com.rapidminer.parameter.conditions.ParameterCondition;
 import com.rapidminer.repository.RepositoryAccessor;
 import com.rapidminer.tools.I18N;
 import com.rapidminer.tools.Ontology;
-import com.rapidminer.tools.ProgressListener;
 import com.rapidminer.tools.config.ConfigurationManager;
 import com.rapidminer.tools.config.ParameterTypeConfigurable;
-
-import org.elasticsearch.index.query.QueryBuilders;
 
 //import java.awt.List;
 

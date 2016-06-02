@@ -4,13 +4,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import com.rapidminer.operator.io.ExampleSetToElasticSearchWriter;
 import com.rapidminer.parameter.ParameterHandler;
 import com.rapidminer.parameter.ParameterType;
-import com.rapidminer.parameter.ParameterTypeBoolean;
-import com.rapidminer.parameter.ParameterTypePassword;
 import com.rapidminer.parameter.ParameterTypeString;
-import com.rapidminer.parameter.conditions.BooleanParameterCondition;
 import com.rapidminer.tools.I18N;
 import com.rapidminer.tools.config.AbstractConfigurator;
 
