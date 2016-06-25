@@ -78,12 +78,24 @@ public class ElasticSearchSuggestionProvider implements SuggestionProvider<Strin
 		    	
 		    	
 		    			    	
-				String serverUrl = connection.getParameter("server_url");
-				String serverPort = connection.getParameter("server_port");
-				String serverClusterName = connection.getParameter("cluster_name");
+		//		String serverUrl = connection.getParameter("server_url");
+		//		String serverPort = connection.getParameter("server_port");
+		//		String serverClusterName = connection.getParameter("cluster_name");
 
 				LOGGER.info("got parameters");
-				Client client = new ElasticSearchClient(serverUrl, serverPort, serverClusterName).getTransportclient();
+				
+				
+				//Client client = new ElasticSearchClient(serverUrl, serverPort, serverClusterName).getTransportclient();
+				Client client = new ElasticSearchClient(connection).getTransportclient();
+				
+		//		String serverUrl = connection.getParameter("server_url");
+		//				String serverPort = connection.getParameter("server_port");
+		//				String serverClusterName = connection.getParameter("cluster_name");
+		//				String usenrmae = connection.getParameter("username");
+		//				String password = connection.getParameter("password");
+				
+						
+				
 		      if (this.type == Type.INDEX)
 		      {
 		    	  LOGGER.info("type is index");

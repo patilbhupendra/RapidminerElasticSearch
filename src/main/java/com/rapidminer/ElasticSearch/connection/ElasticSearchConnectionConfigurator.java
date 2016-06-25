@@ -6,7 +6,10 @@ import java.util.logging.Logger;
 
 import com.rapidminer.parameter.ParameterHandler;
 import com.rapidminer.parameter.ParameterType;
+import com.rapidminer.parameter.ParameterTypeBoolean;
+import com.rapidminer.parameter.ParameterTypePassword;
 import com.rapidminer.parameter.ParameterTypeString;
+import com.rapidminer.parameter.conditions.BooleanParameterCondition;
 import com.rapidminer.tools.I18N;
 import com.rapidminer.tools.config.AbstractConfigurator;
 
@@ -16,12 +19,18 @@ public class ElasticSearchConnectionConfigurator extends
 	
 	 private static final String I18N_CONF_URL = I18N.getGUIMessage("gui.configurator.elasticsearch.elasticsearch_server_url", new Object[0]);
 	 private static final String I18N_CONF_PORT = I18N.getGUIMessage("gui.configurator.elasticsearch.elasticsearch_server_port", new Object[0]);
-//	  private static final String I18N_CONF_AUTH = I18N.getGUIMessage("gui.configurator.elasticsearch.http_basic_auth", new Object[0]);
+	  private static final String I18N_CONF_AUTH = I18N.getGUIMessage("gui.configurator.elasticsearch.http_basic_auth", new Object[0]);
 //	  private static final String I18N_CONF_USER = I18N.getGUIMessage("gui.configurator.elasticsearch.http_basic_auth.user", new Object[0]);
 //	  private static final String I18N_CONF_PSW = I18N.getGUIMessage("gui.configurator.elasticsearch.http_basic_auth.password", new Object[0]);
 	  private static final String I18N_CLUSTER_NAME = I18N.getGUIMessage("gui.configurator.elasticsearch.cluster_name", new Object[0]);
 	  
+	  private static final String I18N_CONF_USER = I18N.getGUIMessage("gui.configurator.elasticsearch.http_basic_auth.user", new Object[0]);
+	  private static final String I18N_CONF_PSW = I18N.getGUIMessage("gui.configurator.elasticsearch.http_basic_auth.password", new Object[0]);
 	
+
+	  private static final String I18N_CONF_SSLFLAG = I18N.getGUIMessage("gui.configurator.elasticsearch.sslflag", new Object[0]);
+	  private static final String I18N_CONF_SSLPATH = I18N.getGUIMessage("gui.configurator.elasticsearch.sslpath", new Object[0]);
+	  
 	  private static final Logger LOGGER = Logger.getLogger(ElasticSearchConnectionConfigurator.class
 	            .getName());
 
@@ -78,6 +87,27 @@ public class ElasticSearchConnectionConfigurator extends
 	    paramClusterName.setDefaultValue("my-application");
 	    parameterTypes.add(paramClusterName);
 	    
+	    
+	    parameterTypes.add(new ParameterTypeBoolean("uses_authentication", I18N_CONF_AUTH, false, false));
+	    
+	    ParameterTypeString paramTypeUser = new ParameterTypeString("username", I18N_CONF_USER, true);
+	    paramTypeUser.registerDependencyCondition(new BooleanParameterCondition(parameterHandler, "uses_authentication", true, true));
+	    
+	    parameterTypes.add(paramTypeUser);
+	    
+	    ParameterTypePassword paramTypePassword = new ParameterTypePassword("password", I18N_CONF_PSW);
+	    paramTypePassword.registerDependencyCondition(new BooleanParameterCondition(parameterHandler, "uses_authentication", true, true));
+	    
+	    parameterTypes.add(paramTypePassword);
+	
+	    
+	    parameterTypes.add(new ParameterTypeBoolean("uses_ssl", I18N_CONF_SSLFLAG, false, false));
+	    
+	    ParameterTypeString paramTypeSSLPath = new ParameterTypeString("ssl_path", I18N_CONF_SSLPATH, true);
+	    paramTypeSSLPath.registerDependencyCondition(new BooleanParameterCondition(parameterHandler, "uses_ssl", true, true));
+	    
+	    parameterTypes.add(paramTypeSSLPath);
+	
 	    
 	    return parameterTypes;
 		

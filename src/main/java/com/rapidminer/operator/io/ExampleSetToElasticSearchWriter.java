@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import org.apache.commons.collections15.IteratorUtils;
+import org.elasticsearch.action.admin.indices.create.CreateIndexAction;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
@@ -67,9 +68,9 @@ public class ExampleSetToElasticSearchWriter extends AbstractWriter<ExampleSet> 
 				LOGGER.info("Error in retreiving Connection parameter");
 				throw new UserError(this, e, "Couldn't retrieve a Elastic Search connection.");
 			}
-			String serverUrl = connection.getParameter("server_url");
+		    String serverUrl = connection.getParameter("server_url");
 			String serverPort = connection.getParameter("server_port");
-			String serverClusterName = connection.getParameter("cluster_name");
+		    String serverClusterName = connection.getParameter("cluster_name");
 			String indexName = this.getParameterAsString("INDEX_NAME");
 			String indexType = this.getParameterAsString("INDEX_TYPE");
 
@@ -77,7 +78,9 @@ public class ExampleSetToElasticSearchWriter extends AbstractWriter<ExampleSet> 
 			LOGGER.finest("index type is "  + indexType);
 
 			LOGGER.finest("Attempting to create Elastic Search Client on server \"" + serverUrl  + "\" on port \"" + serverPort + "\" Cluster is  \""  + serverClusterName +"\"");
-			Client client = new ElasticSearchClient(serverUrl, serverPort, serverClusterName).getTransportclient();
+			//Client client = new ElasticSearchClient(serverUrl, serverPort, serverClusterName).getTransportclient();
+			
+			Client client = new ElasticSearchClient(connection).getTransportclient();
 			LOGGER.finest("Done building Elastic Search client");
 
 			final Iterator<Attribute> attributes = exampleSet.getAttributes().allAttributes();
@@ -89,6 +92,12 @@ public class ExampleSetToElasticSearchWriter extends AbstractWriter<ExampleSet> 
 			 * code to handle mappings 
 			 */
 			final CreateIndexRequestBuilder createIndexRequestBuilder = client.admin().indices().prepareCreate(indexName);
+			
+		
+			
+			
+			
+			
 			XContentBuilder mappingBuilder = BuildMapping(client,indexName, attributesList);
 			createIndexRequestBuilder.addMapping(indexType, mappingBuilder);
 			
@@ -137,7 +146,7 @@ public class ExampleSetToElasticSearchWriter extends AbstractWriter<ExampleSet> 
 					
 					
 				}
-				LOGGER.finest(json.toString());
+		//		LOGGER.finest(json.toString());
 				bulkRequest.add(client.prepareIndex(indexName, indexType).setSource(json));
 				  
 								 
@@ -159,6 +168,7 @@ public class ExampleSetToElasticSearchWriter extends AbstractWriter<ExampleSet> 
 		{
 			LOGGER.info("Exception in writing");
 			LOGGER.info(e.getMessage());
+		
 			//LOGGER.info(e.);
 		}
 		return null;

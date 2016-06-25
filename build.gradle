@@ -13,6 +13,7 @@ repositories {
     jcenter()
 	maven { url 'https://maven.rapidminer.com/content/groups/public/' }
 	maven { url 'https://search.maven.org' }
+	maven { url "https://maven.elasticsearch.org/releases"}
 }
 
 extensionConfig {
@@ -54,7 +55,8 @@ extensionConfig {
 // Define third party library dependencies
 dependencies {
 	//compile 'com.google.guava:guava:18.0'
-	compile 'org.elasticsearch:elasticsearch:2.3.2'
+	compile 'org.elasticsearch:elasticsearch:2.3.3'
+	compile "org.elasticsearch.plugin:shield:2.3.3"
 	//compile group: 'org.codehaus.jackson', name: 'jackson-core-asl', version: '1.9.13'
 	compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.7.4'
 	compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.7.4'

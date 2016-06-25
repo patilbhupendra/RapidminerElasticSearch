@@ -44,9 +44,9 @@ public class ElasticSearchConnection extends AbstractConfigurable {
 				.actionGet().getState()
 				.getMetaData();
 
-		LOGGER.info("ddd index is " + indexName);
-		LOGGER.info("ddd type is " + type);
-		LOGGER.info("ddd fieldsarray" + fieldsarray[0]);
+		LOGGER.finest("Index is" + indexName);
+		LOGGER.finest("Type of index is " + type);
+		LOGGER.finest("First field is fieldsarray" + fieldsarray[0]);
 		
 		String[] indices = {indexName};
 		String[] types = {type};
@@ -96,16 +96,13 @@ public class ElasticSearchConnection extends AbstractConfigurable {
 		LOGGER.fine("Setting up new ES connection");
 		this.testAction = new TestConfigurableAction()
 		{
-			public ActionResult doWork()
+			public ActionResult doWork() 
 			{
 				ActionResult.Result result = null;
 				String message = null;
 				try
 				{
-					String host = ElasticSearchConnection.this.getParameter("server_url");
-					String port = ElasticSearchConnection.this.getParameter("server_port");
-					String clustername = ElasticSearchConnection.this.getParameter("cluster_name");
-					ElasticSearchClient ESclient = new ElasticSearchClient(host, port, clustername);
+					ElasticSearchClient ESclient = new ElasticSearchClient(ElasticSearchConnection.this);
 					Client client = ESclient.getTransportclient();
 
 					result = ActionResult.Result.SUCCESS;

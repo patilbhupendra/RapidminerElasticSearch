@@ -109,8 +109,9 @@ AbstractReader<ExampleSet> implements ESParameterProvider {
 			String serverClusterName = connection.getParameter("cluster_name");
 			
 			
-			Client client = new ElasticSearchClient(serverUrl, serverPort,
-					serverClusterName).getTransportclient();
+			//Client client = new ElasticSearchClient(serverUrl, serverPort,
+			//		serverClusterName).getTransportclient();
+			Client client = new ElasticSearchClient(connection).getTransportclient();
 
 			LOGGER.finest("Elastic search Client Built. Now prepariing Search request Builder");
 			SearchRequestBuilder srb = client.prepareSearch();
