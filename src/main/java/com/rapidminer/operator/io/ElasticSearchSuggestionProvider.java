@@ -102,38 +102,19 @@ public class ElasticSearchSuggestionProvider implements SuggestionProvider<Strin
 		    	  String[] indexarray = connection.getListofIndexes(client);
 		    	  suggestions.addAll( Arrays.asList(indexarray));
 		      }
-		 //     else if (this.type == Type.FIELDS)
-		 //     {
-		 //       List<String> fields = new LinkedList(solrConnection.getCollectionFields(this.solrParameterProvider.getCollectionName(), this.solrParameterProvider.isGenerated()).keySet());
-		//        suggestions.addAll(fields);
-		 //     }
-		//      else if (this.type == Type.DATE_FIELDS)
-		//      {
-		//        List<String> fields = new LinkedList();
-		//        Map<String, SolrFieldInfo> fieldMap = solrConnection.getCollectionFields(this.solrParameterProvider
-		//          .getCollectionName(), this.solrParameterProvider.isGenerated());
-		//        for (Map.Entry<String, SolrFieldInfo> fieldEntry : fieldMap.entrySet()) {
-		//          if (SolrjTypeUtil.getSolrDateTypes().contains(((SolrFieldInfo)fieldEntry.getValue()).getFieldType())) {
-		//            fields.add(fieldEntry.getKey());
-		//          }
-		//        }
-		 //       suggestions.addAll(fields);
-		  //    }
+		
 		    }
 		    catch (Exception e)
 		    {
 		    	LOGGER.info("caught an exception");
 		    	LOGGER.info(e.getMessage());
-		   //   if (Boolean.parseBoolean(ParameterService.getParameterValue("rapidminer.general.debugmode"))) {
-		   //     LogService.getRoot().log(Level.WARNING, I18N.getErrorMessage("error.solr.server_general", new Object[0]), e);
-		   //   }
+
 		    }
 		    finally
 		    {
 		      pl.complete();
 		      LOGGER.info("compelted");
 		    }
-		   // Collections.sort(suggestions);
 		    return suggestions;
 		  }
 

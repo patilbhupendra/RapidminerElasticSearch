@@ -101,13 +101,13 @@ public class ElasticSearchConnectionConfigurator extends
 	    parameterTypes.add(paramTypePassword);
 	
 	    
-	    parameterTypes.add(new ParameterTypeBoolean("uses_ssl", I18N_CONF_SSLFLAG, false, false));
+	/*    parameterTypes.add(new ParameterTypeBoolean("uses_ssl", I18N_CONF_SSLFLAG, false, false));
 	    
 	    ParameterTypeString paramTypeSSLPath = new ParameterTypeString("ssl_path", I18N_CONF_SSLPATH, true);
 	    paramTypeSSLPath.registerDependencyCondition(new BooleanParameterCondition(parameterHandler, "uses_ssl", true, true));
 	    
 	    parameterTypes.add(paramTypeSSLPath);
-	
+	*/
 	    
 	    return parameterTypes;
 		

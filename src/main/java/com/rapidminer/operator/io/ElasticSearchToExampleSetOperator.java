@@ -109,20 +109,13 @@ AbstractReader<ExampleSet> implements ESParameterProvider {
 			String serverClusterName = connection.getParameter("cluster_name");
 			
 			
-			//Client client = new ElasticSearchClient(serverUrl, serverPort,
-			//		serverClusterName).getTransportclient();
 			Client client = new ElasticSearchClient(connection).getTransportclient();
 
 			LOGGER.finest("Elastic search Client Built. Now prepariing Search request Builder");
 			SearchRequestBuilder srb = client.prepareSearch();
 			srb.setIndices(indexsuggestion);
-		
-		
-			///srb.setQuery(query)
-			
 			String[] fieldsarray = {};
 			if(fields != null && !fields.isEmpty())
-			//if (!(fields.isEmpty()))
 				if (fields.trim().length() > 0) {
 					fieldsarray = fields.split(",");
 					for (String x : fieldsarray) {
@@ -135,7 +128,6 @@ AbstractReader<ExampleSet> implements ESParameterProvider {
 			LOGGER.finest("Elastic Search: Added fields parameter to the Search Request Builder");
 			
 			if(searchJson != null && !searchJson.isEmpty())
-				//if(!searchJson.isEmpty())
 					{
 					LOGGER.info("Found search Json as =>" + searchJson);
 					srb.setQuery(searchJson);
@@ -144,11 +136,6 @@ AbstractReader<ExampleSet> implements ESParameterProvider {
 				{
 					LOGGER.info("Did not find Found search Json =>");
 				}
-				
-			// QueryBuilder qb = termQuery("Text","event");
-
-			//QueryBuilders.
-			
 			LOGGER.finest("Query builder done");
 
 			SearchResponse scrollResp = srb.setScroll(new TimeValue(60000))
@@ -160,9 +147,6 @@ AbstractReader<ExampleSet> implements ESParameterProvider {
 					+ String.valueOf(scrollResp.getHits().totalHits())
 					+ " hits ");
 
-			// Add transport addresses and do something with the client...
-			// MatchAll on the whole cluster with all default options
-			// Scroll until no hits are returned
 			Integer rowcounter = 0;
 			do {
 				
@@ -302,17 +286,7 @@ AbstractReader<ExampleSet> implements ESParameterProvider {
 		searchJSon.setExpert(true);
 		types.add(searchJSon);
 		
-		//ParameterType valueType = new ParameterTypeString(SEARCH_NAME,"function to call",false);
-		//List<String[]> defaultList = new ArrayList<String[]>(); 
-		//String[] name ={"apples","oranges"};
-		//String[] name2 ={"apples2","oranges2"};
-		//defaultList.add(name);
-		//defaultList.add(name2);
-				
-		//ParameterTypeList searchList = new ParameterTypeList("SearchList", "SearchListdescrib", valueType, new ParameterTypeString(SEARCH_VALUE,
-		//		"The value of the annotation", false),defaultList, false) ;
-		//types.add(searchList);
-		
+	
 		
 		ParameterTypeInt numberofrows = new  ParameterTypeInt("ROWCOUNT","Number of rows you want to retrieve",1,Integer.MAX_VALUE);
 		numberofrows.setOptional(true);
